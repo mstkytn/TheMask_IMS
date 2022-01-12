@@ -21,11 +21,11 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 fontScale = 1
 color = (255, 0, 0)
 thickness = 2
-org = (50, 50)
 #
 frameWidth = 640
 frameHeight = 480
-fps = 1000
+o = (frameWidth/2, frameHeight/2)
+fps = 300
 trigger_iter = 30 # record and play 1 minutes - after mentioned times blanks iter
 """make trigger iter dynamic"""
 
@@ -52,23 +52,23 @@ def detectPlay(frame):
             C = (bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3])
             D = (bounding_box[0], bounding_box[1] + bounding_box[3])
             #"""
-            #play OSC parameters#
-            valFreq = np.average(keypoints.__getitem__('nose'))
-            valRoom = keypoints.__getitem__('left_eye')[0]
-            valRevt = keypoints.__getitem__('right_eye')[0]
-            valAmp = bounding_box[3]
-            valDcy = bounding_box[1]
-            valPhs = bounding_box[0]
-            valRate = keypoints.__getitem__('mouth_right')[0]
-            valSpr = max(keypoints.__getitem__('nose'))
-            valPr = keypoints.__getitem__('mouth_left')[0]
-            valPan = B[0]
-            valDly = 1 - fac.__getitem__('confidence')
+            n = keypoints.__getitem__('nose')
             eyeAxis = keypoints.__getitem__('left_eye')[1] - keypoints.__getitem__('right_eye')[1]
             mouthAxis = keypoints.__getitem__('mouth_left')[1] - keypoints.__getitem__('mouth_right')[1]
+            #play OSC parameters#
+            valPan = abs(o[0] - n[0])
+            valDly = abs(eyeAxis)
+            valRate = n[1]
+            valPr = valPan
+            valAmp = bounding_box[2] + bounding_box[3]
+            valDcy =  abs(n[1] - o[1])
+            valPhs = keypoints.__getitem__('right_eye')[1]
+            valSpr = eyeAxis
+            valRoom = abs(mouthAxis)
+            valRevt = keypoints.__getitem__('left_eye')[0]
             #
-            osc_msg = ['M', valFreq , valRoom, valRevt, valAmp, valDcy, valPhs,
-                       valRate, valSpr, valPr, valPan, valDly, eyeAxis, mouthAxis]
+            osc_msg = ['M', valPan, valDly, valRate, valPr, valAmp, valDcy, valPhs, valSpr,
+                       valRoom, valRevt, eyeAxis, mouthAxis]
             client.send_message("/pyOsc", osc_msg)  # manipulate
             print(osc_msg)
             #"""
