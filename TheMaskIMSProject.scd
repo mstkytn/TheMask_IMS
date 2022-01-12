@@ -67,7 +67,7 @@ Spec.add(\pan, [0, 4, \lin]);
 \pan.asSpec;
 Spec.add(\dly, [0.2, 0.5, \lin]);
 \dly.asSpec;
-Spec.add(\rate, [0, 4], \lin);
+Spec.add(\rate, [-4, 4], \lin);
 \rate.asSpec;
 Spec.add(\pR, [0.001,20, \lin]);
 \pR.asSpec;
