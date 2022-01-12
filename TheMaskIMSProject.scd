@@ -1,6 +1,4 @@
-TheMaskProject2 (py- osc, openCV)
-// 2 den sonra, b buffer ını record et, sonra 3 ü çalıştır, ~play çal, ~play free bırak
-//loop : record + play + free
+TheMaskProject (py- osc, openCV)
 // Setup
 // 1 sETTING uP tHE iNITIALS +
 (
@@ -37,17 +35,19 @@ b = Buffer.alloc(s, 44100 * ~t, 1);
 // 3 sONIC mATERIAL
 (x = (SynthDef(\TheSound, {
 		|room =10, revt = 1, amp = 0.01,dcy = 1,
-		phs = 1, rate = 0.5, spr = 20, pR = 1, pan = 0.1,
+		phs = 1, rate = 0.5, spr = 20, pR = 1, pan = 1,
 		dly = 0.2|
 	var freq = Pitch.kr(SoundIn.ar(0));
 	var buf = PlayBuf.ar(1, b, rate,SinOsc.kr((rate)/(~t )));
-	var rev = GVerb.ar(buf, room, revt,spread: spr);
+	var rev = GVerb.ar(buf*0.4, room, revt,spread: spr);
 	var ps = PitchShift.ar(buf,pitchRatio: pR);
-	var fs = FreqShift.ar(ps,freq,phs);
-	var pnd = Pan2.ar(fs,pan);
-	var prev = FreeVerb2.ar(pnd,pnd);
-	var pdel = 	CombC.ar(prev,0.3, dly,dcy);
-		Out.ar(0,pdel) * amp})))
+	var fs = FreqShift.ar(ps,freq-400,phs);
+	var pnd = Pan2.ar(fs,ps);
+	var prev = FreeVerb2.ar(pnd,rev);
+	var pdel = CombC.ar(prev,0.3, dly,dcy);
+	var norm = Normalizer.ar(pdel,0.1,0.2);
+	var end = Limiter.ar(norm,amp,0.2);
+		Out.ar(pan,end)})))
 
 // 4 oSC fUNDAMENTAL TDEFs +
 (Tdef(\PLAY,
@@ -62,30 +62,30 @@ b = Buffer.alloc(s, 44100 * ~t, 1);
 thisProcess.openPorts)
 
 // 6 mAPPING
-(Spec.add(\freq, [-600, 1200, \lin]);
-\freq.asSpec;
-Spec.add(\room, [0, 100, \lin]);
-\room.asSpec;
-Spec.add(\revt, [0, 100, \lin]);
-\revt.asSpec;
-Spec.add(\amp, [0.01, 0.2, \lin]);
-\amp.asSpec;
-Spec.add(\rate, [1, 10]);
-\rate.asSpec;
-Spec.add(\pR, [0.0001, 4, \lin]);
-\pR.asSpec;
-Spec.add(\pan, [-1, 1, \lin]);
+(
+Spec.add(\pan, [0, 4, \lin]);
 \pan.asSpec;
-Spec.add(\dly, [0.001, 1, \lin]);
+Spec.add(\dly, [0.2, 0.5, \lin]);
 \dly.asSpec;
-Spec.add(\dcy, [0.001, 1, \lin]);
+Spec.add(\rate, [0, 4], \lin);
+\rate.asSpec;
+Spec.add(\pR, [0.001,20, \lin]);
+\pR.asSpec;
+Spec.add(\amp, [0.01, 0.06, \exp]);
+\amp.asSpec;
+Spec.add(\dcy, [-0.2, 0.4, \lin]);
 \dcy.asSpec;
-/* henüz net değil
-Spec.add(\spr, [0.001, 1, \lin]);
-\spr.asSpec;
-Spec.add(\phs, [0.001, 1, \lin]);
+Spec.add(\phs, [0.1, 10, \lin]);
 \phs.asSpec;
-*/)
+Spec.add(\spr, [-100, 100, \lin]);
+\spr.asSpec;
+Spec.add(\room, [0, 1, \lin]);
+\room.asSpec;
+Spec.add(\revt, [0, 0.15, \lin]);
+\revt.asSpec;
+Spec.add(\freq, [-600, 1200, \lin]);
+\freq.asSpec;
+)
 
 // 7 oSC dEFS + Alternative Mapped
 (
@@ -99,20 +99,16 @@ OSCdef.new(\OSC1, {
 			{Tdef(\PLAY).play;"PLAYING".postln}
 			{if (rp == 'M')
 				{
-//					~play.set(\freq, \freq.asSpec.map(msg[2]*3 - 600).postln); // FREQ
-					~play.set(\room, \room.asSpec.map(msg[3] / 12 ).postln); // ROOM
-					~play.set(\revt, \revt.asSpec.map(msg[4] / 12).postln); // REVT
-//					~play.set(\amp, \amp.asSpec.map(msg[5] / 100).postln); // AMP
-					~play.set(\rate, \rate.asSpec.map(msg[8] / 30).postln); // RATE
-//					~play.set(\pR, \pR.asSpec.map(msg[10] / 250).postln); // PITCH RATIO
-//					~play.set(\pan, \pan.asSpec.map(msg[11]/ 1200 - 1).postln); // PAN
-//					~play.set(\dly, \dly.asSpec.map(msg[12] / 1200).postln); // DELAY
-//					~play.set(\dcy, \dcy.asSpec.map(msg[6] / 1200).postln); // DECAY
-//--				~play.set(\spr, \spr.asSpec.map(msg[9] / 600).postln); // SPREAD
-//--				~play.set(\phs, \phs.asSpec.map(msg[7] / 600).postln); // PHASE
-/*					~play.set(\xxx, \xxx.asSpec.map(msg[2] / 600).postln); // EYE AXIS
-					~play.set(\xxx, \xxx.asSpec.map(msg[2] / 600).postln); // MOUTH AXIS
-*/
+				~play.set(\pan, \pan.asSpec.map((msg[2]/640)).postln); // PAN
+				~play.set(\dly, \dly.asSpec.map(msg[3]/120).postln); // DELAY
+				~play.set(\rate, \rate.asSpec.map((msg[4]-40)/460).postln); // RATE
+				~play.set(\pR, \pR.asSpec.map(msg[5] / 250).postln); // PITCH RATIO
+				~play.set(\amp, \amp.asSpec.map(msg[6] / 100).postln); // AMP
+				~play.set(\dcy, \dcy.asSpec.map(msg[7] / 200).postln); // DECAY
+				~play.set(\phs, \phs.asSpec.map(msg[8] / 440).postln); // PHASE
+				~play.set(\spr, \spr.asSpec.map((msg[9] + 50) / 100).postln); // SPREAD
+				~play.set(\room, \room.asSpec.map(msg[10]/10).postln); // ROOM
+				~play.set(\revt, \revt.asSpec.map(msg[11] / 1100).postln); // REVT
 				}
 				{if (rp == 'S')
 					{~play.free;"STOPPED".postln}
@@ -138,20 +134,25 @@ b.free
 
 // MANIPULATION TESTS  ---------------------------------------------START
 
+
 (
 (x = (SynthDef(\TheSound, {
-		|freq = 440, room =10, revt = 1, amp = 1,dcy = 1,
-		phs = 10, rate = 0.5, spr = 20, pR = 1, pan = 0.1,
+		|room =10, revt = 1, amp = 0.01,dcy = 1,
+		phs = 1, rate = 0.5, spr = 20, pR = 1, pan = 1,
 		dly = 0.2|
+	var freq = Pitch.kr(SoundIn.ar(0));
 	var buf = PlayBuf.ar(1, b, rate,SinOsc.kr((rate)/(~t )));
-	var rev = GVerb.ar(buf, room, revt,spread: spr);
+	var rev = GVerb.ar(buf*0.4, room, revt,spread: spr);
 	var ps = PitchShift.ar(buf,pitchRatio: pR);
-	var fs = FreqShift.ar(ps,freq,phs);
-	var pnd = Pan2.ar(fs,pan);
-	var prev = FreeVerb2.ar(pnd,pnd);
-	var pdel = 	CombC.ar(prev,0.3, dly,dcy);
-		Out.ar(0,pdel) * amp}
-)));
+	var fs = FreqShift.ar(ps,freq-400,phs);
+	var pnd = Pan2.ar(fs,ps);
+	var prev = FreeVerb2.ar(pnd,rev);
+	var pdel = CombC.ar(prev,0.3, dly,dcy);
+	var norm = Normalizer.ar(pdel,0.1,0.2);
+	var end = Limiter.ar(norm,amp,0.2);
+		Out.ar(pan,end)})))
+
+;
 
 ~play = x.play //found
 )
@@ -163,19 +164,19 @@ b.free
 
 ~play.set(\freq, 240) // mouth width
 ~play.set(\room, 1) //mouth height
-~play.set(\revt, 1) // orientation
-~play.set(\amp, 1) //*****
+~play.set(\revt, 0.15) // orientation
+~play.set(\amp, 0.06) //*****
 ~play.set(\rate, 2.1) //  center pose
-~play.set(\spr, 100) // nosetril
+~play.set(\spr, 10) // nosetril
 ~play.set(\pR,1) // scale
 ~play.set(\pan, 0) // left eye + right eye
-~play.set(\dly, 80) // left eye~playrow
-~play.set(\dcy, 1) // right eye~playrow
-~play.set(\phs, 0.6) // jaw openness
+~play.set(\dly, 0.5) // left eye~playrow
+~play.set(\dcy, 0.4) // right eye~playrow
+~play.set(\phs, 10) // jaw openness
 
 ------ END
 
 // MANIPULATION TESTS  ---------------------------------------------END
 
-
+~play.free
 ~play = x.play //found
