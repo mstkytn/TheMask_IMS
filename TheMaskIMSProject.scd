@@ -63,7 +63,7 @@ thisProcess.openPorts)
 
 // 6 mAPPING
 (
-Spec.add(\pan, [0, 4, \lin]);
+Spec.add(\pan, [0, 1, \lin]);
 \pan.asSpec;
 Spec.add(\dly, [0.2, 0.5, \lin]);
 \dly.asSpec;
@@ -118,3 +118,8 @@ OSCdef.new(\OSC1, {
 		}
 },'/pyOsc')
 )
+
+--
+s.record()
+--
+s.stopRecording()
