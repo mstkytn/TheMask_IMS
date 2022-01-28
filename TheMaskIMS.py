@@ -4,7 +4,6 @@ from mtcnn_cv2 import MTCNN
 import time
 import numpy as np
 import argparse
-import time
 from pythonosc import udp_client
 
 #DEFS
