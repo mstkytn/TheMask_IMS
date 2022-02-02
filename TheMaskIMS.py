@@ -47,24 +47,22 @@ def detectPlay(frame):
             keypoints = fac.__getitem__('keypoints')
             bounding_box = fac.__getitem__('box')
             A = (bounding_box[0], bounding_box[1])
-            B = (bounding_box[0] + bounding_box[2], bounding_box[1])
             C = (bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3])
-            D = (bounding_box[0], bounding_box[1] + bounding_box[3])
             #"""
             n = keypoints.__getitem__('nose')
             eyeAxis = keypoints.__getitem__('left_eye')[1] - keypoints.__getitem__('right_eye')[1]
             mouthAxis = keypoints.__getitem__('mouth_left')[1] - keypoints.__getitem__('mouth_right')[1]
             #play OSC parameters#
             valPan = abs(o[0] - n[0])
-            valDly = abs(eyeAxis)
-            valRate = n[1]
-            valPr = valPan
-            valAmp = bounding_box[2] + bounding_box[3]
             valDcy =  abs(n[1] - o[1])
-            valPhs = keypoints.__getitem__('right_eye')[1]
-            valSpr = eyeAxis
-            valRoom = abs(mouthAxis)
-            valRevt = keypoints.__getitem__('left_eye')[0]
+            valDly = abs(eyeAxis)
+            valRoom = abs(keypoints.__getitem__('mouth_left')[0] - keypoints.__getitem__('mouth_right')[0])
+            valSpr = abs(keypoints.__getitem__('left_eye')[0] - keypoints.__getitem__('right_eye')[0])
+            valRate = abs((bounding_box[0] + bounding_box[2] / 2) - n[0])
+            valRevt = abs((bounding_box[1] + bounding_box[3] / 2) - n[1])
+            valPr = abs(keypoints.__getitem__('left_eye')[1] - keypoints.__getitem__('mouth_left')[1])
+            valPhs = abs(keypoints.__getitem__('right_eye')[1] - keypoints.__getitem__('mouth_right')[1])
+            valAmp = bounding_box[2] + bounding_box[3]
             #
             osc_msg = ['M', valPan, valDly, valRate, valPr, valAmp, valDcy, valPhs, valSpr,
                        valRoom, valRevt, eyeAxis, mouthAxis]
