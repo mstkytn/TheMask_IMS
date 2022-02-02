@@ -5,9 +5,9 @@ TheMaskProject (py- osc, openCV)
 s.boot;
 (
 s.options.inDevice = "Built-in Microph";
-s.options.numInputBusChannels = 4;
+s.options.numInputBusChannels = 2;
 s.options.outDevice = "Built-in Output";
-s.options.numOutputBusChannels = 4;
+s.options.numOutputBusChannels = 2;
 );
 (
 s.makeGui(f);
