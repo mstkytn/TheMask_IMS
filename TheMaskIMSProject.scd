@@ -52,10 +52,10 @@ b = Buffer.alloc(s, 44100 * ~t, 1);
 // 4 oSC fUNDAMENTAL TDEFs +
 (Tdef(\PLAY,
 		     {"Manipulate It!".postln;
-			  ~play = x.play;
-		      52.wait;
-			  "The End, Thanks for the performance!".postln;
-			  ~play.free;}))
+			~play = x.play;
+		     	52.wait;
+			"The End, Thanks for the performance!".postln;
+			~play.free;}))
 
 // 5 oSC aDDRESS
 (thisProcess.openUDPPort(57121);
@@ -63,25 +63,25 @@ thisProcess.openPorts)
 
 // 6 mAPPING
 (
-Spec.add(\pan, [0, 1, \lin]);
+Spec.add(\pan, [-1, 2, \lin]);
 \pan.asSpec;
-Spec.add(\dly, [0.2, 0.5, \lin]);
+Spec.add(\dly, [0.02, 0.7, \lin]);
 \dly.asSpec;
 Spec.add(\rate, [-4, 4], \lin);
 \rate.asSpec;
-Spec.add(\pR, [0.001,20, \lin]);
+Spec.add(\pR, [0.1,20, \lin]);
 \pR.asSpec;
-Spec.add(\amp, [0.01, 0.06, \exp]);
+Spec.add(\amp, [0.001, 0.06, \exp]);
 \amp.asSpec;
-Spec.add(\dcy, [-0.2, 0.4, \lin]);
+Spec.add(\dcy, [-0.2, 0.6, \lin]);
 \dcy.asSpec;
-Spec.add(\phs, [0.1, 10, \lin]);
+Spec.add(\phs, [0.5, 8, \lin]);
 \phs.asSpec;
-Spec.add(\spr, [-100, 100, \lin]);
+Spec.add(\spr, [-400, 400, \lin]);
 \spr.asSpec;
-Spec.add(\room, [0, 1, \lin]);
+Spec.add(\room, [0, 5, \lin]);
 \room.asSpec;
-Spec.add(\revt, [0, 0.15, \lin]);
+Spec.add(\revt, [0.01, 0.3, \lin]);
 \revt.asSpec;
 Spec.add(\freq, [-600, 1200, \lin]);
 \freq.asSpec;
@@ -99,16 +99,16 @@ OSCdef.new(\OSC1, {
 			{Tdef(\PLAY).play;"PLAYING".postln}
 			{if (rp == 'M')
 				{
-				~play.set(\pan, \pan.asSpec.map((msg[2]/640)).postln); // PAN
-				~play.set(\dly, \dly.asSpec.map(msg[3]/120).postln); // DELAY
-				~play.set(\rate, \rate.asSpec.map((msg[4]-40)/460).postln); // RATE
-				~play.set(\pR, \pR.asSpec.map(msg[5] / 250).postln); // PITCH RATIO
-				~play.set(\amp, \amp.asSpec.map(msg[6] / 100).postln); // AMP
+				~play.set(\pan, \pan.asSpec.map(msg[2] / 280).postln); // PAN
+				~play.set(\dly, \dly.asSpec.map(msg[3] / 24).postln); // DELAY
+				~play.set(\rate, \rate.asSpec.map(msg[4] / 40).postln); // RATE
+				~play.set(\pR, \pR.asSpec.map((msg[5]-40) / 60).postln); // PITCH RATIO
+				~play.set(\amp, \amp.asSpec.map(msg[6] / 400).postln); // AMP
 				~play.set(\dcy, \dcy.asSpec.map(msg[7] / 200).postln); // DECAY
-				~play.set(\phs, \phs.asSpec.map(msg[8] / 440).postln); // PHASE
-				~play.set(\spr, \spr.asSpec.map((msg[9] + 50) / 100).postln); // SPREAD
-				~play.set(\room, \room.asSpec.map(msg[10]/10).postln); // ROOM
-				~play.set(\revt, \revt.asSpec.map(msg[11] / 1100).postln); // REVT
+				~play.set(\phs, \phs.asSpec.map(msg[8] / 200).postln); // PHASE
+				~play.set(\spr, \spr.asSpec.map(msg[9] / 180).postln); // SPREAD
+				~play.set(\room, \room.asSpec.map(msg[10] / 140).postln); // ROOM
+				~play.set(\revt, \revt.asSpec.map(msg[11] / 30).postln); // REVT
 				}
 				{if (rp == 'S')
 					{~play.free;"STOPPED".postln}
